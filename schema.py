@@ -251,7 +251,9 @@ class CreateActor(Mutation):
     class Arguments:
         actor_input = ActorInput(required=True)
 
-    actor = Field(Actor, required=True)
+    class Meta:
+        # We're going to return not a `CreateActor`, but an `Actor`
+        output = Actor
 
     def mutate(root, info, actor_input):
         db_cursor.execute(
@@ -266,8 +268,7 @@ class CreateActor(Mutation):
             })
         new_actor = db_cursor.fetchone()
         db_connection.commit()
-        foo = CreateActor(actor=Actor(**new_actor))
-        return foo
+        return Actor(**new_actor)
 
 
 # Analagous to the Query object, this object collects all the GraphQL mutations.

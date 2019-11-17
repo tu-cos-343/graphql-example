@@ -125,3 +125,22 @@ you will not be able to execute the mutations.
       }
     }
     ```
+1. Create an actor.
+    ```
+    mutation NewActor($input: ActorInput!) {
+      createActor(actorInput: $input) {
+        actorId
+        firstName
+        lastName
+      }
+    }
+    ```
+   Pass the details in the *Query Variables* window
+    ```
+    {
+      "input": {
+        "firstName": "Fred",
+        "lastName": "Ziffle"
+      }
+    }
+    ```
