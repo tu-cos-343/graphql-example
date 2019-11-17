@@ -1,7 +1,7 @@
 import psycopg2
 # Import a bunch of content from the Graphene library. These imports allow us
 # to implement the GraphQL schema.
-from graphene import ObjectType, String, Schema, Int, Float, List, Field, DateTime, Mutation
+from graphene import ObjectType, String, Schema, Int, Float, List, Field, DateTime, Mutation, InputObjectType
 from psycopg2.extras import RealDictCursor
 
 # Create a connection to Postgres. You will have to update the configuration information here.
@@ -35,12 +35,6 @@ class Actor(ObjectType):
     first_name = String(required=True)
     last_name = String(required=True)
     last_update = DateTime(required=True)
-    full_name = String()
-
-    # Graphene can resolve most scalar field values using its default resolver.
-    # Here, we have a custom field for which we supply the resolver.
-    def resolve_full_name(actor, info):
-        return f"{actor['first_name']} {actor['last_name']}"
 
 
 # GraphQL type for categories.
@@ -193,7 +187,7 @@ class CreateCategory(Mutation):
 
     # A mutation must define a method called `mutate`. The `name` argument reflects
     # the field found in the `Arguments` subclass, above.
-    def mutate(parent, info, name):
+    def mutate(root, info, name):
         db_cursor.execute(
             """
             INSERT INTO category(name)
@@ -228,7 +222,7 @@ class DeleteCategory(Mutation):
     # We're going to return an object containing the number of rows deleted.
     rows_affected = Int(required=True)
 
-    def mutate(parent, info, category_id):
+    def mutate(root, info, category_id):
         db_cursor.execute(
             """
             DELETE FROM category
@@ -243,10 +237,44 @@ class DeleteCategory(Mutation):
         return DeleteCategory(rows_affected=row_count)
 
 
+# This class defines a GraphQL input type. Although this example has only two fields,
+# defining an input type for complex inputs is a best practice. See the CreateActor
+# mutation for how this object is used.
+class ActorInput(InputObjectType):
+    first_name = String(required=True)
+    last_name = String(required=True)
+
+
+class CreateActor(Mutation):
+    """Create an actor."""
+
+    class Arguments:
+        actor_input = ActorInput(required=True)
+
+    actor = Field(Actor, required=True)
+
+    def mutate(root, info, actor_input):
+        db_cursor.execute(
+            """
+            INSERT INTO actor(first_name, last_name)
+            VALUES (%(first)s, %(last)s)
+            RETURNING *
+            """,
+            {
+                "first": actor_input.first_name,
+                "last": actor_input.last_name
+            })
+        new_actor = db_cursor.fetchone()
+        db_connection.commit()
+        foo = CreateActor(actor=Actor(**new_actor))
+        return foo
+
+
 # Analagous to the Query object, this object collects all the GraphQL mutations.
 class Mutation(ObjectType):
     create_category = CreateCategory.Field()
     delete_category = DeleteCategory.Field()
+    create_actor = CreateActor.Field()
 
 
 # The top-level object for the GraphQL schema, this class constructor takes
