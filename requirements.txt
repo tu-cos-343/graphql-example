@@ -1,0 +1,16 @@
+aniso8601==7.0.0
+Click==7.0
+Flask==1.1.1
+Flask-GraphQL==2.0.0
+graphene==2.1.8
+graphql-core==2.2.1
+graphql-relay==2.0.0
+graphql-server-core==1.1.1
+itsdangerous==1.1.0
+Jinja2==2.10.3
+MarkupSafe==1.1.1
+promise==2.2.1
+psycopg2==2.8.4
+Rx==1.6.1
+six==1.13.0
+Werkzeug==0.16.0
