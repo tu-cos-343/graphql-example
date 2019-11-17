@@ -13,7 +13,13 @@ It uses:
 ## Installation
 
 1. Clone the repository via Git.
+   ```bash
+   % git clone https://github.com/tu-cos-343/graphql-example.git
+   ```
 1. Change directory to your shiny new clone.
+   ```bash
+   % cd graphql-example
+   ```
 1. Create a Python3 virtual environment.
    ```bash
    % python3 -m venv venv
@@ -45,7 +51,77 @@ you can access the GraphiQL IDE in your browser
 at 
 http://localhost:5000/graphiql.
 
-
-
-
 ## GraphQL Schema
+
+The `schema.py` file
+implements our GraphQL schema.
+You will find extensive comments in that file
+that explain the various pieces and parts.
+Please take the time to read over the comments
+so that you understand how it works.
+
+## Sample Queries
+
+Following are examples of queries and mutations
+that the `schema.py` file implements.
+Note that if you are connecting to a read-only
+database account,
+you will not be able to execute the mutations.
+
+1. Retrieve all the films in the database.
+   Note that we also ask for the actors,
+   which causes the `resolve_actors` method to run.
+    ```
+    query AllFilms {
+      films {
+        filmId
+        title
+        description
+        actors {
+          fullName
+        }
+      }
+    }
+    ```
+1. Retrieve a single actor. 
+   Here the `actorId` is passed as a parameter.
+   ```
+   query OneActor($id: Int!) {
+     actor(actorId: $id) {
+       firstName
+       lastName
+       lastUpdate
+     }
+   }
+   ```
+   In `GraphiQL`, use the *Query Variables*
+   window to supply a JSON object with the ID.
+   For example:
+   ```json
+   { "id": 42 }
+   ``` 
+
+1. Add a new category.
+   Passes the name for the category directly.
+   Probably better to use a parameter
+   as shown for `OneActor`.
+    ```
+    mutation AddCategory {
+      createCategory(name: "Nerd Films") {
+        categoryId
+        name
+      }
+    }
+    ```
+1. Delete a category.
+   Delete an existing category by its category ID.
+   Note that the database will still enforce
+   referential integrity if another database entity
+   refers to the category being deleted.    
+    ```
+    mutation DeleteCategory($id: Int!) {
+      deleteCategory(categoryId: $id) {
+        rowsAffected
+      }
+    }
+    ```
