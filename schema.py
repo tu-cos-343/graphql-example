@@ -85,28 +85,28 @@ class Film(ObjectType):
     def resolve_actors(film, info):
         db_cursor.execute(
             """
-            SELECT * FROM actor
+            SELECT actor.actor_id, first_name, last_name, actor.last_update FROM actor
             INNER JOIN film_actor 
               ON actor.actor_id = film_actor.actor_id
             WHERE film_actor.film_id = %(film_pk)s 
             """,
             {"film_pk": film['film_id']}
         )
-        return db_cursor.fetchall()
+        return [Actor(**row_data) for row_data in db_cursor.fetchall()]
 
     # Retrieve the categories for this film. Refer to the documentation for `resolve_actors`,
-    # which is analagous.
+    # which is analogous.
     def resolve_categories(film, info):
         db_cursor.execute(
             """
-            SELECT * FROM category
+            SELECT category.category_id, name FROM category
             INNER JOIN film_category
                 ON category.category_id = film_category.category_id
             WHERE film_category.film_id = %(film_pk)s 
             """,
             {"film_pk": film['film_id']}
         )
-        return db_cursor.fetchall()
+        return [Category(**row_data) for row_data in db_cursor.fetchall()]
 
 
 # This is our top-level query type. All queries known to our GraphQL schema are declared here.
@@ -138,7 +138,7 @@ class Query(ObjectType):
             """,
             {'id': actor_id}
         )
-        return db_cursor.fetchone()
+        return Actor(**db_cursor.fetchone())
 
     # Resolve the list of all actors.
     def resolve_actors(root, info):
@@ -180,7 +180,7 @@ class CreateCategory(Mutation):
     #
     # The `name` is the only field we have to supply. The others are created by the database
     # when we insert a new category: `category_id` is a synthetics key and `last_update` is
-    # defined to defualt to the current time.
+    # defined to default to the current time.
     category_id = Int(required=True)
     name = String(required=True)
     last_update = DateTime(required=True)
@@ -271,7 +271,7 @@ class CreateActor(Mutation):
         return Actor(**new_actor)
 
 
-# Analagous to the Query object, this object collects all the GraphQL mutations.
+# Analogous to the Query object, this object collects all the GraphQL mutations.
 class Mutation(ObjectType):
     create_category = CreateCategory.Field()
     delete_category = DeleteCategory.Field()
