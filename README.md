@@ -49,7 +49,7 @@ http://localhost:5000.
 Because `app.py` enables GraphiQL support,
 you can access the GraphiQL IDE in your browser
 at 
-http://localhost:5000/graphiql.
+http://localhost:5000/graphql.
 
 ## GraphQL Schema
 
