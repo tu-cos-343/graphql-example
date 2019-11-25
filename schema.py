@@ -1,7 +1,7 @@
 import psycopg2
 # Import a bunch of content from the Graphene library. These imports allow us
 # to implement the GraphQL schema.
-from graphene import ObjectType, String, Schema, Int, Float, List, Field, DateTime, Mutation, InputObjectType
+from graphene import ObjectType, String, Schema, Int, Float, List, Field, DateTime, Mutation, InputObjectType, NonNull
 from psycopg2.extras import RealDictCursor
 
 # Create a connection to Postgres. You will have to update the configuration information here.
@@ -64,7 +64,7 @@ class Film(ObjectType):
     rating = String()
 
     # Because these are lists of other types, the default resolver won't be sufficient.
-    actors = List(Actor)
+    actors = List(NonNull(lambda: Actor), required=True)
     categories = List(Category)
 
     # Resolve the `actors` field. Note that the name of this function must match
